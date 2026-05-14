@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вайб-кодинг и AI-разработка | Киберпанк</title>
+    <style>
+        :root {
+            --bg: #050510;
+            --bg-card: #0a0a1a;
+            --bg-card-hover: #0f0f25;
+            --neon-cyan: #00f0ff;
+            --neon-magenta: #ff00aa;
+            --neon-purple: #b300ff;
+            --neon-green: #00ff41;
+            --neon-yellow: #ffd000;
+            --neon-orange: #ff6a00;
+            --text: #c8c8d4;
+            --text-bright: #e8e8f0;
+            --border: #1a1a3a;
+            --glow-cyan: 0 0 8px #00f0ff88, 0 0 20px #00f0ff44, 0 0 40px #00f0ff22;
+            --glow-magenta: 0 0 8px #ff00aa88, 0 0 20px #ff00aa44, 0 0 40px #ff00aa22;
+            --glow-purple: 0 0 8px #b300ff88, 0 0 20px #b300ff44, 0 0 40px #b300ff22;
+            --glow-green: 0 0 8px #00ff4188, 0 0 20px #00ff4144;
+            --glow-yellow: 0 0 8px #ffd00088, 0 0 20px #ffd00044;
+            --font-mono: 'Courier New', 'Consolas', 'Monaco', monospace;
+            --font-main: 'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif;
+            --scanline-opacity: 0.04;
+            --grid-size: 40px;
+            --grid-color: rgba(0, 240, 255, 0.03);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: #00f0ff33 #050510;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050510;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #00f0ff33;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f0ff66;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* === Анимированный фон: сетка + сканирующие линии === */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background-image:
+                linear-gradient(rgba(0, 240, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.02) 1px, transparent 1px);
+            background-size: var(--grid-size) var(--grid-size);
+            animation: gridPulse 8s ease-in-out infinite;
+        }
+
+        @keyframes gridPulse {
+            0%,
+            100% {
+                opacity: 0.6;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            background: repeating-linear-gradient(0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 0, 0, var(--scanline-opacity)) 2px,
+                    rgba(0, 0, 0, var(--scanline-opacity)) 4px);
+        }
+
+        /* === Частицы (чистый CSS) === */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--neon-cyan);
+            border-radius: 50%;
+            animation: floatUp linear infinite;
+            opacity: 0;
+            box-shadow: 0 0 4px var(--neon-cyan), 0 0 10px var(--neon-cyan);
+        }
+        .particle:nth-child(odd) {
+            background: var(--neon-magenta);
+            box-shadow: 0 0 4px var(--neon-magenta), 0 0 10px var(--neon-magenta);
+        }
+        .particle:nth-child(3n) {
+            background: var(--neon-purple);
+            box-shadow: 0 0 4px var(--neon-purple), 0 0 10px var(--neon-purple);
+        }
+        .particle:nth-child(4n) {
+            background: var(--neon-green);
+            box-shadow: 0 0 4px var(--neon-green), 0 0 10px var(--neon-green);
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-10vh) translateX(40px);
+                opacity: 0;
+            }
+        }
+
+        /* === Основной контейнер === */
+        .main-container {
+            position: relative;
+            z-index: 2;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* === НАВИГАЦИЯ === */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(8, 8, 25, 0.85);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 240, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+        .navbar.scrolled {
+            border-bottom-color: rgba(0, 240, 255, 0.35);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 240, 255, 0.15);
+            background: rgba(8, 8, 25, 0.94);
+        }
+        .nav-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .nav-logo {
+            font-family: var(--font-mono);
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--neon-cyan);
+            text-shadow: var(--glow-cyan);
+            text-decoration: none;
+            white-space: nowrap;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .nav-logo:hover {
+            text-shadow: 0 0 15px #00f0ff, 0 0 35px #00f0ffaa, 0 0 60px #00f0ff55;
+            color: #fff;
+        }
+        .nav-logo .accent {
+            color: var(--neon-magenta);
+            text-shadow: var(--glow-magenta);
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .nav-links a {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            color: #aab;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: all 0.3s;
+            position: relative;
+            white-space: nowrap;
+            border: 1px solid transparent;
+        }
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--neon-cyan);
+            background: rgba(0, 240, 255, 0.06);
+            border-color: rgba(0, 240, 255, 0.3);
+            text-shadow: 0 0 6px rgba(0, 240, 255, 0.6);
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.1) inset;
+        }
+        .nav-links a.nav-cta {
+            background: rgba(255, 0, 170, 0.12);
+            border-color: rgba(255, 0, 170, 0.4);
+            color: var(--neon-magenta);
+            text-shadow: 0 0 6px rgba(255, 0, 170, 0.5);
+            animation: pulseBorder 2.5s ease-in-out infinite;
+        }
+        .nav-links a.nav-cta:hover {
+            background: rgba(255, 0, 170, 0.2);
+            border-color: rgba(255, 0, 170, 0.7);
+            box-shadow: 0 0 20px rgba(255, 0, 170, 0.25) inset;
+            color: #fff;
+        }
+        @keyframes pulseBorder {
+            0%,
+            100% {
+                border-color: rgba(255, 0, 170, 0.4);
+            }
+            50% {
+                border-color: rgba(255, 0, 170, 0.8);
+            }
+        }
+
+        /* Бургер-меню для мобильных */
+        .burger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 8px;
+            z-index: 101;
+        }
+        .burger span {
+            display: block;
+            width: 28px;
+            height: 2px;
+            background: var(--neon-cyan);
+            border-radius: 2px;
+            transition: all 0.3s;
+            box-shadow: 0 0 6px var(--neon-cyan);
+        }
+        .burger.open span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        .burger.open span:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+        .burger.open span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -5px);
+        }
+
+        /* === СЕКЦИИ === */
+        .section {
+            padding: 70px 0;
+            position: relative;
+        }
+        .section-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .section-tag {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--neon-magenta);
+            text-shadow: var(--glow-magenta);
+            margin-bottom: 8px;
+            display: block;
+        }
+        .section-title {
+            font-family: var(--font-mono);
+            font-size: 2.4rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--neon-cyan);
+            text-shadow: var(--glow-cyan);
+            margin-bottom: 12px;
+            position: relative;
+            display: inline-block;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+            box-shadow: 0 0 10px var(--neon-cyan);
+            border-radius: 2px;
+        }
+        .section-subtitle {
+            color: #889;
+            font-size: 1rem;
+            max-width: 600px;
+            margin: 10px auto 0;
+        }
+
+        /* === HERO === */
+        .hero {
+            text-align: center;
+            padding: 90px 0 70px;
+            position: relative;
+        }
+        .hero-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(0, 240, 255, 0.06) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: heroGlowPulse 4s ease-in-out infinite;
+        }
+        @keyframes heroGlowPulse {
+            0%,
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.6;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.3);
+                opacity: 1;
+            }
+        }
+        .hero-badge {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            padding: 6px 18px;
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            border-radius: 20px;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 8px var(--neon-cyan);
+            background: rgba(0, 240, 255, 0.05);
+            margin-bottom: 20px;
+            animation: badgeFlicker 3s ease-in-out infinite;
+        }
+        @keyframes badgeFlicker {
+            0%,
+            100% {
+                border-color: rgba(0, 240, 255, 0.4);
+            }
+            50% {
+                border-color: rgba(0, 240, 255, 0.9);
+            }
+            30%,
+            70% {
+                box-shadow: 0 0 18px rgba(0, 240, 255, 0.3);
+            }
+        }
+        .hero h1 {
+            font-family: var(--font-mono);
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #fff;
+            text-shadow: 0 0 30px rgba(0, 240, 255, 0.5), 0 0 80px rgba(0, 240, 255, 0.2);
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+        .hero h1 .highlight {
+            color: var(--neon-magenta);
+            text-shadow: 0 0 30px rgba(255, 0, 170, 0.6), 0 0 80px rgba(255, 0, 170, 0.2);
+        }
+        .hero p {
+            font-size: 1.1rem;
+            color: #99a;
+            max-width: 650px;
+            margin: 0 auto 30px;
+            position: relative;
+            z-index: 1;
+        }
+        .hero-cta-row {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* === КНОПКИ === */
+        .btn {
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            padding: 12px 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.35s;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid transparent;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .btn-primary {
+            background: rgba(0, 240, 255, 0.1);
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+            text-shadow: 0 0 6px var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2), inset 0 0 15px rgba(0, 240, 255, 0.04);
+        }
+        .btn-primary:hover {
+            background: rgba(0, 240, 255, 0.2);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.4), inset 0 0 25px rgba(0, 240, 255, 0.1);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+        .btn-accent {
+            background: rgba(255, 0, 170, 0.1);
+            border-color: var(--neon-magenta);
+            color: var(--neon-magenta);
+            text-shadow: 0 0 6px var(--neon-magenta);
+            box-shadow: 0 0 15px rgba(255, 0, 170, 0.2), inset 0 0 15px rgba(255, 0, 170, 0.04);
+        }
+        .btn-accent:hover {
+            background: rgba(255, 0, 170, 0.2);
+            box-shadow: 0 0 30px rgba(255, 0, 170, 0.4), inset 0 0 25px rgba(255, 0, 170, 0.1);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+        .btn-big {
+            font-size: 1rem;
+            padding: 16px 36px;
+            letter-spacing: 2px;
+            border-radius: 8px;
+            animation: btnGlowPulse 3s ease-in-out infinite;
+        }
+        @keyframes btnGlowPulse {
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(255, 0, 170, 0.25), 0 0 50px rgba(255, 0, 170, 0.08);
+            }
+            50% {
+                box-shadow: 0 0 35px rgba(255, 0, 170, 0.5), 0 0 70px rgba(255, 0, 170, 0.2);
+            }
+        }
+
+        /* === КАРТОЧКИ === */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 20px;
+        }
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px 24px;
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .card:hover {
+            background: var(--bg-card-hover);
+            border-color: rgba(0, 240, 255, 0.35);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 25px rgba(0, 240, 255, 0.1);
+            transform: translateY(-4px);
+        }
+        .card:hover::before {
+            opacity: 1;
+        }
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 14px;
+            display: block;
+            filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.5));
+        }
+        .card h3 {
+            font-family: var(--font-mono);
+            font-size: 1.2rem;
+            color: #e0e0f0;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+        .card p {
+            color: #99a;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .card.magenta-card::before {
+            background: linear-gradient(90deg, transparent, var(--neon-magenta), transparent);
+        }
+        .card.magenta-card:hover {
+            border-color: rgba(255, 0, 170, 0.35);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 0, 170, 0.1);
+        }
+        .card.magenta-card .card-icon {
+            filter: drop-shadow(0 0 10px rgba(255, 0, 170, 0.5));
+        }
+        .card.purple-card::before {
+            background: linear-gradient(90deg, transparent, var(--neon-purple), transparent);
+        }
+        .card.purple-card:hover {
+            border-color: rgba(179, 0, 255, 0.35);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 25px rgba(179, 0, 255, 0.1);
+        }
+        .card.purple-card .card-icon {
+            filter: drop-shadow(0 0 10px rgba(179, 0, 255, 0.5));
+        }
+
+        /* === ТАБЛИЦА ПЛЮСОВ/МИНУСОВ === */
+        .pros-cons-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .pros-column,
+        .cons-column {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px 24px;
+            transition: all 0.3s;
+        }
+        .pros-column {
+            border-left: 3px solid var(--neon-green);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.06);
+        }
+        .pros-column:hover {
+            border-color: rgba(0, 255, 65, 0.5);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.12);
+        }
+        .cons-column {
+            border-left: 3px solid var(--neon-orange);
+            box-shadow: 0 0 20px rgba(255, 106, 0, 0.06);
+        }
+        .cons-column:hover {
+            border-color: rgba(255, 106, 0, 0.5);
+            box-shadow: 0 0 30px rgba(255, 106, 0, 0.12);
+        }
+        .pros-column h3,
+        .cons-column h3 {
+            font-family: var(--font-mono);
+            font-size: 1.3rem;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .pros-column h3 {
+            color: var(--neon-green);
+            text-shadow: var(--glow-green);
+        }
+        .cons-column h3 {
+            color: var(--neon-orange);
+            text-shadow: 0 0 8px #ff6a0088, 0 0 20px #ff6a0044;
+        }
+        .pros-column ul,
+        .cons-column ul {
+            list-style: none;
+            padding: 0;
+        }
+        .pros-column li,
+        .cons-column li {
+            padding: 10px 0 10px 28px;
+            position: relative;
+            color: #bbc;
+            font-size: 0.95rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            transition: all 0.3s;
+        }
+        .pros-column li:hover,
+        .cons-column li:hover {
+            color: #fff;
+        }
+        .pros-column li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--neon-green);
+            text-shadow: 0 0 8px var(--neon-green);
+            font-weight: bold;
+        }
+        .cons-column li::before {
+            content: '✗';
+            position: absolute;
+            left: 0;
+            color: var(--neon-orange);
+            text-shadow: 0 0 8px var(--neon-orange);
+            font-weight: bold;
+        }
+
+        /* === БЛОК ПРЕДСКАЗАНИЯ === */
+        .fortune-section {
+            text-align: center;
+            padding: 60px 0;
+        }
+        .fortune-box {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 40px 30px;
+            max-width: 600px;
+            margin: 30px auto 0;
+            position: relative;
+            transition: all 0.5s;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+        }
+        .fortune-box.result-ready {
+            border-color: rgba(255, 0, 170, 0.6);
+            box-shadow: 0 0 50px rgba(255, 0, 170, 0.2), 0 0 100px rgba(179, 0, 255, 0.1);
+            animation: resultGlow 1.5s ease-in-out infinite;
+        }
+        @keyframes resultGlow {
+            0%,
+            100% {
+                box-shadow: 0 0 50px rgba(255, 0, 170, 0.2), 0 0 100px rgba(179, 0, 255, 0.1);
+            }
+            50% {
+                box-shadow: 0 0 70px rgba(255, 0, 170, 0.4), 0 0 130px rgba(179, 0, 255, 0.25);
+            }
+        }
+        .fortune-result {
+            font-family: var(--font-mono);
+            font-size: 1.3rem;
+            color: #fff;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.02);
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            letter-spacing: 1px;
+            transition: all 0.5s;
+            word-break: break-word;
+        }
+        .fortune-result.glowing-text {
+            text-shadow: 0 0 15px rgba(255, 0, 170, 0.7), 0 0 40px rgba(255, 0, 170, 0.3);
+            animation: textFlicker 0.15s ease-in-out 3;
+        }
+        @keyframes textFlicker {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+        .fortune-emoji {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 10px;
+            animation: bounceEmoji 0.6s ease-out;
+        }
+        @keyframes bounceEmoji {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* === ФУТЕР === */
+        .footer {
+            text-align: center;
+            padding: 30px 20px;
+            border-top: 1px solid var(--border);
+            color: #556;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            font-family: var(--font-mono);
+            position: relative;
+            z-index: 2;
+        }
+        .footer span {
+            color: var(--neon-cyan);
+            text-shadow: 0 0 6px var(--neon-cyan);
+        }
+
+        /* === АДАПТИВНОСТЬ === */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                background: rgba(8, 8, 25, 0.97);
+                border-radius: 0 0 12px 12px;
+                padding: 16px 0;
+                gap: 2px;
+                border: 1px solid var(--border);
+                border-top: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                z-index: 99;
+            }
+            .nav-links.show {
+                display: flex;
+            }
+            .nav-links a {
+                padding: 12px 20px;
+                border-radius: 0;
+                border: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            }
+            .burger {
+                display: flex;
+            }
+            .nav-inner {
+                position: relative;
+            }
+            .pros-cons-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .section-title {
+                font-size: 1.7rem;
+            }
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+            .fortune-result {
+                font-size: 1rem;
+            }
+        }
+        @media (max-width: 400px) {
+            .hero-cta-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .btn {
+                text-align: center;
+            }
+            .section {
+                padding: 40px 0;
+            }
+            .fortune-box {
+                padding: 24px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Частицы -->
+    <div class="particles" aria-hidden="true">
+        <div class="particle" style="left:5%;animation-duration:12s;animation-delay:0s;"></div>
+        <div class="particle" style="left:12%;animation-duration:15s;animation-delay:2s;"></div>
+        <div class="particle" style="left:22%;animation-duration:10s;animation-delay:1s;"></div>
+        <div class="particle" style="left:30%;animation-duration:18s;animation-delay:3s;"></div>
+        <div class="particle" style="left:38%;animation-duration:13s;animation-delay:0.5s;"></div>
+        <div class="particle" style="left:45%;animation-duration:16s;animation-delay:4s;"></div>
+        <div class="particle" style="left:55%;animation-duration:11s;animation-delay:1.5s;"></div>
+        <div class="particle" style="left:62%;animation-duration:14s;animation-delay:2.5s;"></div>
+        <div class="particle" style="left:70%;animation-duration:17s;animation-delay:0.8s;"></div>
+        <div class="particle" style="left:78%;animation-duration:9s;animation-delay:3.5s;"></div>
+        <div class="particle" style="left:85%;animation-duration:19s;animation-delay:1.2s;"></div>
+        <div class="particle" style="left:92%;animation-duration:12s;animation-delay:2.8s;"></div>
+        <div class="particle" style="left:8%;animation-duration:20s;animation-delay:5s;"></div>
+        <div class="particle" style="left:50%;animation-duration:14s;animation-delay:0.3s;"></div>
+        <div class="particle" style="left:35%;animation-duration:11s;animation-delay:6s;"></div>
+    </div>
+
+    <!-- Навигация -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-inner">
+            <a href="#hero" class="nav-logo">&#9650; VIBE<span class="accent">.AI</span></a>
+            <button class="burger" id="burger" aria-label="Меню">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#what-is" data-section="what-is">Что это</a></li>
+                <li><a href="#tools" data-section="tools">Инструменты</a></li>
+                <li><a href="#pros-cons" data-section="pros-cons">Плюсы/Минусы</a></li>
+                <li><a href="#fortune" class="nav-cta" data-section="fortune">&#9670; Уровень в IT</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <div class="main-container">
+
+        <!-- HERO -->
+        <section class="hero section" id="hero">
+            <div class="hero-glow" aria-hidden="true"></div>
+            <span class="hero-badge">&#9670; 2026 &mdash; ЭРА AI-РАЗРАБОТКИ</span>
+            <h1>Вайб-кодинг &mdash;<br><span class="highlight">новая реальность</span> разработки</h1>
+            <p>Ты просто описываешь идею словами, а искусственный интеллект превращает её в рабочий код. Мир программирования меняется прямо сейчас — будь на гребне волны.</p>
+            <div class="hero-cta-row">
+                <a href="#what-is" class="btn btn-primary">Узнать больше</a>
+                <a href="#fortune" class="btn btn-accent">&#9670; Мой уровень в IT</a>
+            </div>
+        </section>
+
+        <!-- РАЗДЕЛ 1: Что такое вайб-кодинг -->
+        <section class="section" id="what-is">
+            <div class="section-header">
+                <span class="section-tag">&#9632; Раздел 01</span>
+                <h2 class="section-title">Что такое вайб-кодинг?</h2>
+                <p class="section-subtitle">Новый подход к созданию программ, где главное — твоё видение, а не синтаксис.</p>
+            </div>
+            <div class="cards-grid">
+                <div class="card">
+                    <span class="card-icon">&#128172;</span>
+                    <h3>Описание вместо кода</h3>
+                    <p>Вайб-кодинг (vibe coding) — это метод разработки, при котором ты формулируешь задачу на естественном языке, а AI-ассистент генерирует рабочий код. Ты говоришь <em>«сделай кнопку с неоновой подсветкой»</em> — и получаешь готовый результат.</p>
+                </div>
+                <div class="card magenta-card">
+                    <span class="card-icon">&#9889;</span>
+                    <h3>Скорость и импровизация</h3>
+                    <p>Главный принцип — <strong>быстрый прототип</strong>. Вместо часов на написание boilerplate-кода ты тратишь минуты на описание желаемого поведения. Это как джем-сейшен: ты задаёшь ритм, AI подхватывает.</p>
+                </div>
+                <div class="card purple-card">
+                    <span class="card-icon">&#129504;</span>
+                    <h3>Симбиоз человека и AI</h3>
+                    <p>AI не заменяет разработчика, а <strong>усиливает</strong> его. Ты контролируешь архитектуру и логику, а рутину делегируешь машине. Идеальный тандем для тех, кто хочет создавать больше за меньшее время.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- РАЗДЕЛ 2: Главные инструменты -->
+        <section class="section" id="tools">
+            <div class="section-header">
+                <span class="section-tag">&#9632; Раздел 02</span>
+                <h2 class="section-title">Главные инструменты</h2>
+                <p class="section-subtitle">Арсенал современного AI-разработчика: помощники, которые пишут код вместе с тобой.</p>
+            </div>
+            <div class="cards-grid">
+                <div class="card">
+                    <span class="card-icon">&#129302;</span>
+                    <h3>GitHub Copilot</h3>
+                    <p>Встраивается прямо в IDE и предугадывает твои намерения строчка за строчкой. Обучен на миллиардах строк кода. Поддерживает десятки языков и фреймворков.</p>
+                </div>
+                <div class="card magenta-card">
+                    <span class="card-icon">&#128640;</span>
+                    <h3>Cursor IDE</h3>
+                    <p>Редактор кода нового поколения с глубокой AI-интеграцией. Позволяет общаться с моделью в чате, редактировать целые файлы по описанию и получать контекстные подсказки в реальном времени.</p>
+                </div>
+                <div class="card purple-card">
+                    <span class="card-icon">&#127760;</span>
+                    <h3>Claude &amp; ChatGPT</h3>
+                    <p>Универсальные AI-ассистенты, которые помогают проектировать архитектуру, писать функции, отлаживать ошибки и даже объяснять сложные концепции простыми словами. Твой карманный техлид 24/7.</p>
+                </div>
+                <div class="card">
+                    <span class="card-icon">&#128736;</span>
+                    <h3>Replit &amp; Bolt</h3>
+                    <p>Облачные платформы, где можно создать полноценное приложение по текстовому описанию. От идеи до деплоя — за минуты. Идеально для MVP и быстрой проверки гипотез.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- РАЗДЕЛ 3: Плюсы и минусы -->
+        <section class="section" id="pros-cons">
+            <div class="section-header">
+                <span class="section-tag">&#9632; Раздел 03</span>
+                <h2 class="section-title">Плюсы и минусы</h2>
+                <p class="section-subtitle">Честный взгляд на вайб-кодинг: что он даёт, а где пока проигрывает классической разработке.</p>
+            </div>
+            <div class="pros-cons-grid">
+                <div class="pros-column">
+                    <h3>&#9650; ПЛЮСЫ</h3>
+                    <ul>
+                        <li>Колоссальная скорость прототипирования — дни превращаются в часы</li>
+                        <li>Снижение порога входа: кодить могут даже те, кто не знает синтаксиса</li>
+                        <li>Мгновенная помощь с рутинными задачами и boilerplate-кодом</li>
+                        <li>Возможность быстро изучить новую технологию через практику</li>
+                        <li>Идеально для MVP, хакатонов и пет-проектов</li>
+                        <li>AI выступает как «резиновый утёнок» для отладки и рефакторинга</li>
+                    </ul>
+                </div>
+                <div class="cons-column">
+                    <h3>&#9660; МИНУСЫ</h3>
+                    <ul>
+                        <li>Сгенерированный код не всегда оптимален и требует ревью</li>
+                        <li>Риск «разучиться» писать код самостоятельно</li>
+                        <li>Сложные архитектурные решения AI пока доверять рано</li>
+                        <li>Вопросы безопасности: AI может предложить уязвимый код</li>
+                        <li>Зависимость от облачных сервисов и интернета</li>
+                        <li>Юридическая неопределённость авторства AI-сгенерированного кода</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- РАЗДЕЛ 4: Интерактивное предсказание -->
+        <section class="fortune-section section" id="fortune">
+            <div class="section-header">
+                <span class="section-tag">&#9670; Интерактив</span>
+                <h2 class="section-title">Узнать свой уровень в IT</h2>
+                <p class="section-subtitle">Нейросеть-оракул оценит твой потенциал. Нажми на кнопку — и узнаешь свою судьбу в мире технологий.</p>
+            </div>
+            <div class="fortune-box" id="fortuneBox">
+                <button class="btn btn-accent btn-big" id="fortuneBtn" aria-label="Узнать свой уровень в IT">
+                    &#9670; УЗНАТЬ СВОЙ УРОВЕНЬ
+                </button>
+                <div class="fortune-result" id="fortuneResult"></div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <p>&#169; 2026 <span>VIBE.AI</span> &mdash; Вселенная вайб-кодинга. Будущее уже здесь.</p>
+    </footer>
+
+    <script>
+        (function() {
+            // === БУРГЕР-МЕНЮ ===
+            const burger = document.getElementById('burger');
+            const navLinks = document.getElementById('navLinks');
+            const navLinksAll = navLinks.querySelectorAll('a');
+            const navbar = document.getElementById('navbar');
+
+            burger.addEventListener('click', function() {
+                const isOpen = navLinks.classList.toggle('show');
+                burger.classList.toggle('open', isOpen);
+                burger.setAttribute('aria-expanded', isOpen);
+            });
+
+            // Закрытие меню при клике на ссылку (мобильные)
+            navLinksAll.forEach(link => {
+                link.addEventListener('click', () => {
+                    navLinks.classList.remove('show');
+                    burger.classList.remove('open');
+                    burger.setAttribute('aria-expanded', 'false');
+                });
+            });
+
+            // === ПОДСВЕТКА АКТИВНОЙ ССЫЛКИ ПРИ СКРОЛЛЕ ===
+            const sections = [];
+            navLinksAll.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && href.startsWith('#')) {
+                    const sectionEl = document.querySelector(href);
+                    if (sectionEl) {
+                        sections.push({ link, section: sectionEl, id: href.substring(1) });
+                    }
+                }
+            });
+
+            function updateActiveLink() {
+                const scrollY = window.scrollY;
+                const navHeight = navbar.offsetHeight + 20;
+                let activeId = null;
+
+                sections.forEach(({ section, id }) => {
+                    const top = section.offsetTop - navHeight;
+                    const bottom = top + section.offsetHeight;
+                    if (scrollY >= top && scrollY < bottom) {
+                        activeId = id;
+                    }
+                });
+
+                // Подсветка
+                navLinksAll.forEach(link => {
+                    link.classList.remove('active');
+                    const href = link.getAttribute('href');
+                    if (href && href.substring(1) === activeId) {
+                        link.classList.add('active');
+                    }
+                });
+
+                // Тень на навбаре при скролле
+                if (scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            }
+
+            window.addEventListener('scroll', updateActiveLink, { passive: true });
+            updateActiveLink();
+
+            // === ИНТЕРАКТИВНОЕ ПРЕДСКАЗАНИЕ ===
+            const fortuneBtn = document.getElementById('fortuneBtn');
+            const fortuneResult = document.getElementById('fortuneResult');
+            const fortuneBox = document.getElementById('fortuneBox');
+
+            const predictions = [
+                { emoji: '🧠', text: 'Ты — Архитектор AI-систем. Твой уровень: Senior AI-разработчик. Ты не просто пишешь промпты — ты проектируешь будущее. Нейросети слушаются тебя, как джедая.' },
+                { emoji: '⚡', text: 'Ты — Вайб-мастер. Твой уровень: Middle Fullstack. Ты чувствуешь код на интуитивном уровне. Copilot дописывает за тобой строки, а ты уже думаешь на три шага вперёд.' },
+                { emoji: '🚀', text: 'Ты — Стартап-ракета. Твой уровень: Tech Lead. Ты собираешь MVP за выходные, а инвесторы выстраиваются в очередь. Вайб-кодинг — твоё секретное оружие.' },
+                { emoji: '🔮', text: 'Ты — Оракул кода. Твой уровень: Principal Engineer. Ты видишь баги до того, как они появились. AI для тебя — просто ещё один инструмент в арсенале гения.' },
+                { emoji: '🎯', text: 'Ты — Снайпер продакшена. Твой уровень: Senior DevOps. Ты деплоишь AI-сгенерированный код в прод с уверенностью, что всё отработает идеально. И оно работает.' },
+                { emoji: '🌟', text: 'Ты — Восходящая звезда. Твой уровень: Junior+ с огромным потенциалом. Ты только начинаешь путь в AI-разработке, но твоя кривая роста стремится в небо. Продолжай!' },
+                { emoji: '🦄', text: 'Ты — Единорог индустрии. Твой уровень: CTO будущего. Ты сочетаешь глубокое понимание технологий с визионерским мышлением. Компании мечтают заполучить тебя.' },
+                { emoji: '💎', text: 'Ты — Скрытый алмаз. Твой уровень: Self-taught гений. Ты не идёшь проторенными дорогами — ты создаёшь свои. AI-инструменты в твоих руках творят чудеса.' },
+                { emoji: '🔥', text: 'Ты — Промпт-шаман. Твой уровень: AI Whisperer. Ты знаешь такие формулировки промптов, которые заставляют нейросети выдавать шедевры. Твой код — это магия.' },
+                { emoji: '👑', text: 'Ты — Король рефакторинга. Твой уровень: Software Craftsman. Ты берёшь AI-сгенерированный код и превращаешь его в произведение искусства. Чистота, элегантность, perfection.' },
+                { emoji: '🌌', text: 'Ты — Космический кодер. Твой уровень: Galactic Developer. Твой код настолько хорош, что его комментируют даже инопланетяне. AI — твой верный напарник в межзвёздных проектах.' },
+                { emoji: '🎸', text: 'Ты — Рок-звезда GitHub. Твой уровень: Open Source герой. Твои репозитории собирают тысячи звёзд. Ты пишешь код с драйвом, а AI подыгрывает тебе на басу.' },
+            ];
+
+            let isAnimating = false;
+
+            fortuneBtn.addEventListener('click', function() {
+                if (isAnimating) return;
+                isAnimating = true;
+                fortuneBtn.disabled = true;
+                fortuneBtn.textContent = '⏳ АНАЛИЗИРУЕМ...';
+
+                // Сбрасываем предыдущий результат
+                fortuneResult.innerHTML = '';
+                fortuneResult.classList.remove('glowing-text');
+                fortuneBox.classList.remove('result-ready');
+
+                // Имитация «загрузки» — 1.2 секунды
+                const loadSteps = ['▰▱▱▱▱ Сканируем навыки...', '▰▰▱▱▱ Оцениваем потенциал...',
+                    '▰▰▰▱▱ Консультируемся с AI-оракулом...', '▰▰▰▰▱ Формируем предсказание...',
+                    '▰▰▰▰▰ Готово!'
+                ];
+                let step = 0;
+                const loadInterval = setInterval(() => {
+                    fortuneResult.textContent = loadSteps[step] || loadSteps[loadSteps.length - 1];
+                    step++;
+                }, 220);
+
+                setTimeout(() => {
+                    clearInterval(loadInterval);
+
+                    // Выбираем случайное предсказание
+                    const randomIndex = Math.floor(Math.random() * predictions.length);
+                    const prediction = predictions[randomIndex];
+
+                    // Отображаем результат
+                    fortuneResult.innerHTML =
+                        `<span class="fortune-emoji">${prediction.emoji}</span>${prediction.text}`;
+                    fortuneResult.classList.add('glowing-text');
+                    fortuneBox.classList.add('result-ready');
+
+                    // Сбрасываем кнопку
+                    fortuneBtn.textContent = '🔄 УЗНАТЬ ЕЩЁ РАЗ';
+                    fortuneBtn.disabled = false;
+                    isAnimating = false;
+
+                    // Убираем анимацию мерцания через некоторое время
+                    setTimeout(() => {
+                        fortuneResult.classList.remove('glowing-text');
+                    }, 600);
+                }, 1200);
+            });
+
+            // === ПЛАВНЫЙ СКРОЛЛ ДЛЯ ВСЕХ ЯКОРНЫХ ССЫЛОК (на всякий случай) ===
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    const targetEl = document.querySelector(targetId);
+                    if (targetEl) {
+                        e.preventDefault();
+                        const navHeight = navbar.offsetHeight + 10;
+                        const top = targetEl.offsetTop - navHeight;
+                        window.scrollTo({ top, behavior: 'smooth' });
+                    }
+                });
+            });
+
+            console.log('%c🟢 VIBE.AI %cготов к работе %c| %cКиберпанк-терминал активирован',
+                'color:#00f0ff;font-weight:bold;',
+                'color:#fff;',
+                'color:#ff00aa;',
+                'color:#00ff41;');
+            console.log('%cНажми на кнопку «Узнать свой уровень в IT» и узнай свою судьбу в мире технологий! 🚀',
+                'color:#ffd000;');
+        })();
+    </script>
+</body>
+</html>
